@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<style>
+	body { font: 12pt sans-serif; }
+	div { margin: 1em 0; }
+	</style>
+</head>
+<body>
+	<div>
+			SBK Calculator
+	</div>
+	<div>
+			Please enter your CPUID in the box below<br>
+
+		<input type="text" placeholder="Enter CPUID" onkeyup="update();" onchange="update();" id="cpuid">
+	</div>
+	<div id="out">
+		 
+	</div>
+	<div>
+		Source: yaworski on XDA Developers - <a href="https://forum.xda-developers.com/showthread.php?t=1810809">https://forum.xda-developers.com/showthread.php?t=1810809</a>
+
+	</div>
+	<script>
+    var prefix="Your SBK: ";
+	var errMes="Please enter correct CPUID value";
+	
+    function getCpuID() {
+        return document.getElementById("cpuid").value.trim().replace(/^0x/, '').toUpperCase();
+    }
+    
+    function isCPUIDCorrect() {
+        if (getCpuID().match(/^[0-9A-F]{9,16}$/)) {
+            return true;
+        }
+        return false;
+    }
+    
+    function SBK(cpuid){
+        cpuid = cpuid;
+        while(cpuid.length < 16) {
+            cpuid = '0' + cpuid;
+        }
+        var parts = cpuid.match(/.{4}/g);
+        var sbk = [];
+        for (var i = 1; i >= 0; --i) {
+            for (var j = 0; j < 2; ++j) {
+                var tmp = 0;
+                for (var k = 0; k < 4; ++k) {
+                    tmp += Math.pow(100, k) * parts[2 * (i) + j].charCodeAt(3-k);
+                }
+                sbk.push(tmp);
+            }
+        }
+        for (var i = 0; i < 4; i++) {
+            sbk[i] ^= sbk[3 - i];
+        }
+        for (var i = 0; i < 4; i++) {
+            var tmp = sbk[i].toString(16).toUpperCase();
+            while(tmp.length < 8) {
+                tmp = '0' + tmp;
+            }
+            tmp = tmp.match(/.{2}/g);
+            sbk[i] = '0x';
+            for (var j = 3; j >= 0; --j) {
+                sbk[i] += tmp[j];
+            }
+        }
+        return sbk.join(' ');
+    }
+
+    function update() {
+        if (!isCPUIDCorrect()) {
+            document.getElementById("out").innerText = errMes;
+            return;
+        }
+        document.getElementById("out").innerText = prefix + SBK(getCpuID());
+    }
+    
+	</script>
+</body>
+</html>
